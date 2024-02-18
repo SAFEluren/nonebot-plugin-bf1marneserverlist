@@ -4,6 +4,7 @@ name = "nonebot-plugin-bf1marneserverlist"
 version = "0.1.8"
 description = "nonebot-plugin-bf1marneserverlist"
 readme = "README.md"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 nonebot2 = "^2.0.0rc2"
