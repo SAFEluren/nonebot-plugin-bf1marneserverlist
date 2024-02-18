@@ -1,7 +1,7 @@
 [project]
-name = "nonebot-plugin-marneserverlist"
+name = "nonebot-plugin-bf1marneserverlist"
 version = "0.1.0"
-description = "nonebot-plugin-marneserverlist"
+description = "nonebot-plugin-bf1marneserverlist"
 readme = "README.md"
 requires-python = ">=3.8, <4.0"
 
@@ -10,5 +10,5 @@ adapters = [
     { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
 ]
 plugins = []
-plugin_dirs = ["nonebot_plugin_marneserverlist/plugins"]
+plugin_dirs = ["nonebot_plugin_bf1marneserverlist/plugins"]
 builtin_plugins = []
