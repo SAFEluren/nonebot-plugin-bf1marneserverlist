@@ -2,12 +2,11 @@ from nonebot import on_command
 from nonebot import get_plugin_config
 from nonebot.adapters.onebot.v11 import GROUP, Message, MessageEvent, MessageSegment, GroupMessageEvent
 from nonebot.typing import T_State
-from nonebot.params import CommandArg, Depends, _command_arg
+from nonebot.params import _command_arg
 from nonebot.plugin import PluginMetadata
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
 from nonebot.permission import SUPERUSER
 
-import httpx
 from .config import Config
 
 from pathlib import Path
@@ -17,7 +16,7 @@ import httpx
 __plugin_meta__ = PluginMetadata(
     name="nonebot-plugin-bf1marneserverlist",
     description="Onebot plugin for Battlefield 1 Marne",
-    usage="type /marne bind {serverID} and send /marne",
+    usage="type /marne bind [serverID] and send /marne",
 
     type="application",
     # 发布必填，当前有效类型有：`library`（为其他插件编写提供功能），`application`（向机器人用户提供功能）。
@@ -45,7 +44,7 @@ async def is_enable() -> bool:
 
 MARNE_MAIN = on_command(f'marne', block=True, priority=1)
 MARNE_BIND = on_command(f'marne bind', block=True, priority=1,permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
-MARNE_MODS = on_command(f'marne modlist', block=True, priority=1)
+# MARNE_MODS = on_command(f'marne modlist', block=True, priority=1)
 
 async def request_marneAPI(serverID):
     try:
@@ -75,10 +74,6 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
     results = await request_marneAPI(serverID)
     if results is not None:
         result = json.loads(results)
-    else:
-        print("Response content is None")
-
-    if result:
         server_ID = result['id']
         server_name = result['name']
         server_description = result['description']
@@ -104,14 +99,14 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
         await MARNE_BIND.send(msg)
         # await MARNE_BIND.send(f'已绑定服务器ID:{serverID}')
     else:
-        print(result)
         await MARNE_MAIN.send('无法获取到服务器数据，请检查马恩服务器id是否正确，或服务器当前未开启。')
         return
 
-@MARNE_MODS.handle()
-async def marne_mods(event:GroupMessageEvent, state:T_State):
-    message = _command_arg(state) or event.get_message()
-    session = event.group_id
+
+# @MARNE_MODS.handle()
+# async def marne_mods(event:GroupMessageEvent, state:T_State):
+#     message = _command_arg(state) or event.get_message()
+#     session = event.group_id
 
 @MARNE_BIND.handle()
 async def marne_bind(event: GroupMessageEvent, state: T_State):
@@ -133,7 +128,7 @@ async def marne_bind(event: GroupMessageEvent, state: T_State):
         serverName = result['name']
         try:
             with open(CURRENT_FOLDER / f'{session}.json', 'w', encoding='utf-8') as f:
-                    json.dump(result, f, ensure_ascii=False, indent=4)
+                json.dump(result, f, ensure_ascii=False, indent=4)
         except FileNotFoundError:
             CURRENT_FOLDER.mkdir(parents=True,exist_ok=True)
             return
