@@ -42,8 +42,8 @@ CURRENT_FOLDER.mkdir(parents=True,exist_ok=True)
 async def is_enable() -> bool:
     return plugin_config.marne_plugin_enabled
 
-MARNE_MAIN = on_command(f'marne', block=True, priority=1)
-MARNE_BIND = on_command(f'marne bind', block=True, priority=1,permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
+MARNE_MAIN = on_command('marne', block=True, priority=1)
+MARNE_BIND = on_command('marne bind', block=True, priority=1 ,permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
 # MARNE_MODS = on_command(f'marne modlist', block=True, priority=1)
 
 async def request_marneAPI(serverID):
@@ -121,10 +121,9 @@ async def marne_bind(event: GroupMessageEvent, state: T_State):
         return  # 在这里返回，避免继续执行代码
 
     print(serverID)
-    result = await request_marneAPI(serverID)  # 等待异步函数完成
-    results = await request_marneAPI(serverID)
-    if results is not None:
-        result = json.loads(results)
+    result = await request_marneAPI(serverID)
+    if result is not None:
+        result = json.loads(result)
         serverName = result['name']
         try:
             with open(CURRENT_FOLDER / f'{session}.json', 'w', encoding='utf-8') as f:

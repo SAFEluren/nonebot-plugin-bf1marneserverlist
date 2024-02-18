@@ -1,15 +1,18 @@
-[project]
+[tool.poetry]
+authors = ["safeluren"]
 name = "nonebot-plugin-bf1marneserverlist"
 version = "0.1.5"
 description = "nonebot-plugin-bf1marneserverlist"
 readme = "README.md"
-requires-python = ">=3.8, <4.0"
+packages = [{include = "plugins"}]
 
-[tool.nonebot]
-adapters = [
-    { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
-]
-dependencies = ["nonebot2>=2.0.0", "nonebot-adapter-onebot>=2.3.1","httpx>=0.23.3"]
-plugins = []
-plugin_dirs = ["plugins"]
-builtin_plugins = []
+[tool.poetry.dependencies]
+python = "^3.8"
+nonebot2 = "^2.0.0rc2"
+nonebot-adapter-onebot = "^2.2.0"
+httpx = "^0.23.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
