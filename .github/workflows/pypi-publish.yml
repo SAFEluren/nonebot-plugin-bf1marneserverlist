@@ -15,5 +15,5 @@ jobs:
       - name: Publish python poetry package
         uses: JRubics/poetry-publish@v1.10
         with: 
-            pypi_token: ${{ secrets.PYPI_TOKEN }}
+            pypi_token: ${{ secrets.PYPI_API_TOKEN }}
             repository_name: nonebot-plugin-bfchat
