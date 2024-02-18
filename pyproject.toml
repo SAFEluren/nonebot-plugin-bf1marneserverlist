@@ -1,7 +1,7 @@
 [tool.poetry]
 authors = ["safeluren"]
 name = "nonebot-plugin-bf1marneserverlist"
-version = "0.1.7"
+version = "0.1.8"
 description = "nonebot-plugin-bf1marneserverlist"
 readme = "README.md"
 packages = [{include = "bf1marneserverlist"}]
