@@ -9,7 +9,7 @@ requires-python = ">=3.8, <4.0"
 adapters = [
     { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
 ]
-dependencies = ["nonebot2>=2.0.0", "nonebot-adapter-onebot>=2.1.5","requests>=2.31.0"]
+dependencies = ["nonebot2>=2.0.0", "nonebot-adapter-onebot>=2.1.5","httpx>=0.23.3"]
 plugins = []
 plugin_dirs = ["nonebot_plugin_bf1marneserverlist/plugins"]
 builtin_plugins = []
