@@ -6,7 +6,9 @@ from nonebot.params import _command_arg
 from nonebot.plugin import PluginMetadata
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
 from nonebot.permission import SUPERUSER
-
+from nonebot import require
+require("nonebot_plugin_localstore")
+import nonebot_plugin_localstore as store
 from .config import Config
 
 from pathlib import Path
@@ -33,12 +35,10 @@ __plugin_meta__ = PluginMetadata(
 )
 
 plugin_config = get_plugin_config(Config)
+data_dir = store.get_data_dir("bf1marneserverlist")
 
 marne_url = plugin_config.marne_url
     
-CURRENT_FOLDER = Path(plugin_config.marne_data_dir).resolve()
-CURRENT_FOLDER.mkdir(parents=True,exist_ok=True)
-
 async def is_enable() -> bool:
     return plugin_config.marne_plugin_enabled
 
@@ -65,7 +65,7 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
     session = event.group_id
 
     try:
-        with open(CURRENT_FOLDER/f'{session}.json','r', encoding='utf-8') as f:
+        with open(data_dir/f'{session}.json','r', encoding='utf-8') as f:
             group = json.load(f)
     except FileNotFoundError:
         await MARNE_MAIN.send('请先绑定服务器ID.')
@@ -84,7 +84,7 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
         server_currentPlayers = result['currentPlayers']
         server_maxPlayers = result['maxPlayers']
         
-        with open(CURRENT_FOLDER/f'{session}.json','w', encoding='utf-8') as f:
+        with open(data_dir/f'{session}.json','w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=4)
 
         msg = Message([MessageSegment.text(f"查询成功")])
@@ -126,10 +126,10 @@ async def marne_bind(event: GroupMessageEvent, state: T_State):
         result = json.loads(result)
         serverName = result['name']
         try:
-            with open(CURRENT_FOLDER / f'{session}.json', 'w', encoding='utf-8') as f:
+            with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, ensure_ascii=False, indent=4)
         except FileNotFoundError:
-            CURRENT_FOLDER.mkdir(parents=True,exist_ok=True)
+            data_dir.mkdir(parents=True,exist_ok=True)
             return
 
         msg = Message([MessageSegment.text(f"绑定成功！")])
