@@ -1,0 +1,130 @@
+{
+    "id": 3151,
+    "name": "Lindos",
+    "description": "",
+    "region": "SA",
+    "country": "BR",
+    "mapName": "Levels/MP/MP_FaoFortress/MP_FaoFortress",
+    "gameMode": "TeamDeathMatch0",
+    "map": "FAO FORTRESS",
+    "mode": "TEAM DEATHMATCH",
+    "maxPlayers": 64,
+    "needSameMods": false,
+    "allowMoreMods": true,
+    "statsSystem": 2,
+    "tickRate": 1,
+    "password": false,
+    "settings": {
+        "misc": {
+            "minimap spotting": true,
+            "nametags": true,
+            "hud": true,
+            "3d spotting": true,
+            "unlimited magazines": false,
+            "aim assist slowdown": true,
+            "always fog": false,
+            "friendly fire": false,
+            "disable spectator delay": false,
+            "kill cam": true,
+            "only squad leader spawn": false,
+            "disable pre-round": true,
+            "map voting": false,
+            "disable team balancer": true,
+            "regenerate health": true,
+            "vehicle 3p camera": true,
+            "latency lock": false,
+            "behemoths": true,
+            "reload full mags": false
+        },
+        "scales": {
+            "vehicle respawn time": 1,
+            "round time limit": 100,
+            "bullet damage": 1,
+            "ticket count": 1,
+            "respawn time": 1
+        },
+        "weapons": {
+            "melee": true,
+            "handgun": true,
+            "class gadgets": true,
+            "standard issue rifles": false,
+            "lmg": true,
+            "self-loading rifles": true,
+            "shotgun": true,
+            "smg": true,
+            "explosives": true,
+            "single-action rifles": true
+        },
+        "vehicles": {
+            "land vehicles": true,
+            "air vehicles": true
+        },
+        "kits": {
+            "elite classes": true,
+            "scouts": true,
+            "support": true,
+            "assault": true,
+            "medic": true
+        }
+    },
+    "rotation": [
+        {
+            "map": "AMIENS",
+            "mapLongName": "Levels/MP/MP_Amiens/MP_Amiens",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "BALLROOM BLITZ",
+            "mapLongName": "Levels/MP/MP_Chateau/MP_Chateau",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "SINAI DESERT",
+            "mapLongName": "Levels/MP/MP_Desert/MP_Desert",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "FAO FORTRESS",
+            "mapLongName": "Levels/MP/MP_FaoFortress/MP_FaoFortress",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "ARGONNE FOREST",
+            "mapLongName": "Levels/MP/MP_Forest/MP_Forest",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "EMPIRE'S EDGE",
+            "mapLongName": "Levels/MP/MP_ItalianCoast/MP_ItalianCoast",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "MONTE GRAPPA",
+            "mapLongName": "Levels/MP/MP_MountainFort/MP_MountainFort",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "ST. QUENTING SCAR",
+            "mapLongName": "Levels/MP/MP_Scar/MP_Scar",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        },
+        {
+            "map": "SUEZ",
+            "mapLongName": "Levels/MP/MP_Suez/MP_Suez",
+            "mode": "TEAM DEATHMATCH",
+            "modeLongName": "TeamDeathMatch0"
+        }
+    ],
+    "modList": "",
+    "currentPlayers": 0,
+    "playerList": "",
+    "natType": 1
+}
