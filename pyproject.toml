@@ -1,7 +1,7 @@
 [tool.poetry]
 authors = ["safeluren"]
 name = "nonebot-plugin-bf1marneserverlist"
-version = "0.1.12"
+version = "0.1.13"
 description = "nonebot-plugin-bf1marneserverlist"
 readme = "README.md"
 packages = [{include = "nonebot_plugin_bf1marneserverlist"}]
@@ -19,7 +19,7 @@ plugins = ["nonebot_plugin_localstore"]
 adapters = [
     { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
 ]
-plugin_dirs = ["plugins"]
+plugin_dirs = ["nonebot_plugin_bf1marneserverlist"]
 builtin_plugins = []
 
 [build-system]
