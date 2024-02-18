@@ -1,5 +1,5 @@
 import requests
-import json
+
 from nonebot import get_plugin_config
 from .config import Config
 
