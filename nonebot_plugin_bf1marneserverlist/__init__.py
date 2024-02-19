@@ -199,6 +199,6 @@ async def _bind(event: GroupMessageEvent, args: Annotated[Message, CommandArg()]
 
     msg = Message([MessageSegment.text(f"绑定成功！")])
     msg.append(f"\n绑定服务器ID: {serverID}")
-    msg.append(f"\n服务器名字:{serverName}")
+    msg.append(f"\n服务器名字: {serverName}")
 
     await MARNE_BIND.send(msg)
