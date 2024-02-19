@@ -10,7 +10,7 @@ packages = [{include = "nonebot_plugin_bf1marneserverlist"}]
 python = "^3.8"
 nonebot2 = "^2.2.0"
 nonebot-adapter-onebot = "^2.4.0"
-httpx = "^0.23.3"
+httpx = "^0.26.0"
 nonebot_plugin_localstore = "^0.6.0"
 
 

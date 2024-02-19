@@ -1,19 +1,21 @@
-from nonebot import on_command
-from nonebot import get_plugin_config
-from nonebot.adapters.onebot.v11 import GROUP, Message, MessageEvent, MessageSegment, GroupMessageEvent
-from nonebot.typing import T_State
-from nonebot.params import _command_arg
-from nonebot.plugin import PluginMetadata
-from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
-from nonebot.permission import SUPERUSER
-from nonebot import require
-require("nonebot_plugin_localstore")
+import json
+from typing import Annotated
+
+import httpx
 import nonebot_plugin_localstore as store
+from nonebot import get_plugin_config
+from nonebot import on_command
+from nonebot import require
+from nonebot.adapters.onebot.v11 import Message, MessageSegment, GroupMessageEvent
+from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
+from nonebot.params import _command_arg, CommandArg
+from nonebot.permission import SUPERUSER
+from nonebot.plugin import PluginMetadata
+from nonebot.typing import T_State
+
 from .config import Config
 
-from pathlib import Path
-import json
-import httpx
+require("nonebot_plugin_localstore")
 
 __plugin_meta__ = PluginMetadata(
     name="nonebot-plugin-bf1marneserverlist",
@@ -38,18 +40,22 @@ plugin_config = get_plugin_config(Config)
 data_dir = store.get_data_dir("bf1marneserverlist")
 
 marne_url = plugin_config.marne_url
-    
+
+
 async def is_enable() -> bool:
     return plugin_config.marne_plugin_enabled
 
+
 MARNE_MAIN = on_command('marne', block=True, priority=1)
-MARNE_BIND = on_command('marne bind', block=True, priority=1 ,permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
+MARNE_BIND = on_command('marne bind', block=True, priority=1, permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
+
+
 # MARNE_MODS = on_command(f'marne modlist', block=True, priority=1)
 
-async def request_marneAPI(serverID):
+async def request_marneapi(marne_serverid):
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"{marne_url}api/srvlst/{serverID}")
+            response = await client.get(f"{marne_url}api/srvlst/{marne_serverid}")
 
             content = response.text
             if content is not None:
@@ -60,18 +66,20 @@ async def request_marneAPI(serverID):
     except httpx.HTTPStatusError as e:
         print(f"HTTP error occurred: {e}")
 
+
 @MARNE_MAIN.handle()
-async def marne_info(event:GroupMessageEvent, state:T_State):
+# async def marne_info(event: GroupMessageEvent):
+async def _marneinfo(event: GroupMessageEvent):
     session = event.group_id
 
     try:
-        with open(data_dir/f'{session}.json','r', encoding='utf-8') as f:
+        with open(data_dir / f'{session}.json', 'r', encoding='utf-8') as f:
             group = json.load(f)
     except FileNotFoundError:
         await MARNE_MAIN.send('请先绑定服务器ID.')
         return
     serverID = group['id']
-    results = await request_marneAPI(serverID)
+    results = await request_marneapi(serverID)
     if results is not None:
         result = json.loads(results)
         server_ID = result['id']
@@ -83,8 +91,8 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
         server_mode = result['mode']
         server_currentPlayers = result['currentPlayers']
         server_maxPlayers = result['maxPlayers']
-        
-        with open(data_dir/f'{session}.json','w', encoding='utf-8') as f:
+
+        with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=4)
 
         msg = Message([MessageSegment.text(f"查询成功")])
@@ -95,12 +103,11 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
         msg.append(f"\n当前地图: {server_map}")
         msg.append(f"\n游戏模式: {server_mode}")
         msg.append(f"\n当前人数: {server_currentPlayers} / {server_maxPlayers}")
-        
-        await MARNE_BIND.send(msg)
+
+        await MARNE_BIND.finish(msg)
         # await MARNE_BIND.send(f'已绑定服务器ID:{serverID}')
     else:
-        await MARNE_MAIN.send('无法获取到服务器数据，请检查马恩服务器id是否正确，或服务器当前未开启。')
-        return
+        await MARNE_MAIN.finish('无法获取到服务器数据，请检查马恩服务器id是否正确，或服务器当前未开启。')
 
 
 # @MARNE_MODS.handle()
@@ -109,19 +116,20 @@ async def marne_info(event:GroupMessageEvent, state:T_State):
 #     session = event.group_id
 
 @MARNE_BIND.handle()
-async def marne_bind(event: GroupMessageEvent, state: T_State):
-    message = _command_arg(state) or event.get_message()
+async def _bind(event: GroupMessageEvent,args: Annotated[Message, CommandArg()]):
     session = event.group_id
-    args = message.extract_plain_text().strip().split(' ')
-    print(args[0])
+    if len(args) == 0:
+        await MARNE_BIND.finish('未输入服务器ID')
     try:
-        serverID = int(args[0])
-    except ValueError:
-        await MARNE_BIND.send('格式错误，仅允许纯数字')
-        return  # 在这里返回，避免继续执行代码
+        cmdargs=list(args[0].data.values())
+        print(cmdargs)
+        serverID = int(cmdargs[0])
+    except (TypeError,ValueError):
+        await MARNE_BIND.finish('格式错误，仅允许纯数字')
+        return
 
     print(serverID)
-    result = await request_marneAPI(serverID)
+    result = await request_marneapi(serverID)
     if result is not None:
         result = json.loads(result)
         serverName = result['name']
@@ -129,15 +137,15 @@ async def marne_bind(event: GroupMessageEvent, state: T_State):
             with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
                 json.dump(result, f, ensure_ascii=False, indent=4)
         except FileNotFoundError:
-            data_dir.mkdir(parents=True,exist_ok=True)
+            data_dir.mkdir(parents=True, exist_ok=True)
             return
 
         msg = Message([MessageSegment.text(f"绑定成功！")])
-        msg.append(f"\n绑定服务器ID :{serverID}")
+        msg.append(f"\n绑定服务器ID: {serverID}")
         msg.append(f"\n服务器名字:{serverName}")
 
         await MARNE_BIND.send(msg)
         # await MARNE_BIND.send(f'已绑定服务器ID:{serverID}')
     else:
         print(result)
-        await MARNE_MAIN.send('无法获取到服务器数据，请检查马恩服务器id是否正确，或服务器当前未开启。')
+        await MARNE_MAIN.send('无法获取到服务器数据，请检查输入马恩服务器ID是否正确，或服务器当前未开启。')
