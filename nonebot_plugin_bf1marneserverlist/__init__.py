@@ -47,7 +47,8 @@ async def is_enable() -> bool:
 
 MARNE_MAIN = on_command('marne')
 MARNE_MODS = on_command('marne mods')
-MARNE_BIND = on_command('marne bind', block=True, priority=1, permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
+MARNE_PLST = on_command('marne player')
+MARNE_BIND = on_command('marne bind', permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
 
 
 async def request_marneapi(marne_serverid):
@@ -127,12 +128,6 @@ async def _marnemods(event: GroupMessageEvent):
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
 
-    msg = Message([MessageSegment.text(f"查询成功")])
-    msg.append(f"\n绑定的服务器ID: {server_ID}")
-    msg.append(f"\n服务器名字: {server_name}")
-    msg.append(f"\n服务器简介: {server_description}")
-    msg.append(f"\n服务器区域: {server_region} - {server_country}")
-    msg.append(f"\n---------- MOD信息 ----------")
     # 定义键值对的映射关系
     key_mapping = {
         "name": "名称",
@@ -172,6 +167,43 @@ async def _marnemods(event: GroupMessageEvent):
     else:
         msg.append("\n无 MOD 信息")
 
+    await MARNE_BIND.finish(msg)
+
+
+@MARNE_PLST.handle()
+# async def marne_info(event: GroupMessageEvent):
+async def _marneplayers(event: GroupMessageEvent):
+    session = event.group_id
+
+    try:
+        with open(data_dir / f'{session}.json', 'r', encoding='utf-8') as f:
+            group = json.load(f)
+    except FileNotFoundError:
+        await MARNE_MAIN.send('请先绑定服务器ID.')
+        return
+    serverID = group['id']
+    results = await request_marneapi(serverID)
+    result = json.loads(results)
+    server_ID = result['id']
+    server_name = result['name']
+    server_description = result['description']
+    server_region = result['region']
+    server_country = result['country']
+
+    with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=4)
+    player_list = result["playerList"]
+    sorted_player_list = sorted(player_list, key=lambda x: x["team"])
+    msg = Message([MessageSegment.text(f"查询成功")])
+    msg.append(f"\n绑定的服务器ID: {server_ID}")
+    msg.append(f"\n服务器名字: {server_name}")
+    msg.append(f"\n服务器简介: {server_description}")
+    msg.append(f"\n服务器区域: {server_region} - {server_country}")
+    msg.append(f"\n---------- 队伍1 ----------")
+    for index, player in enumerate(sorted_player_list, start=1):
+        msg.append(f"\n{index}.[{player["team"]}]ID: {player["name"]}")
+        if player["team"] == 1 and index < len(sorted_player_list) and sorted_player_list[index]["team"] != 1:
+            msg.append(f"\n---------- 队伍2 ----------")
     await MARNE_BIND.finish(msg)
 
 
