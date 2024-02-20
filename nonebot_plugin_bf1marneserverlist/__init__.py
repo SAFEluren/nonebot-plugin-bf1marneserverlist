@@ -189,21 +189,31 @@ async def _marneplayers(event: GroupMessageEvent):
     server_description = result['description']
     server_region = result['region']
     server_country = result['country']
+    server_currentPlayers = result['currentPlayers']
 
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
     player_list = result["playerList"]
     sorted_player_list = sorted(player_list, key=lambda x: x["team"])
+    team_counts = {"Team 1": 0, "Team 2": 0}
+    # 统计每个队伍的人数
+    for player in player_list:
+        if player["team"] == 1:
+            team_counts["Team 1"] += 1
+        elif player["team"] == 2:
+            team_counts["Team 2"] += 1
+
     msg = Message([MessageSegment.text(f"查询成功")])
     msg.append(f"\n绑定的服务器ID: {server_ID}")
     msg.append(f"\n服务器名字: {server_name}")
     msg.append(f"\n服务器简介: {server_description}")
     msg.append(f"\n服务器区域: {server_region} - {server_country}")
-    msg.append(f"\n---------- 队伍1 ----------")
+    msg.append(f"\n当前人数: {server_currentPlayers}")
+    msg.append(f"\n---------- 队伍1({team_counts['Team 1']}) ----------")
     for index, player in enumerate(sorted_player_list, start=1):
-        msg.append(f"\n{index}.[{player["team"]}]ID: {player["name"]}")
+        msg.append(f"\n{index}.ID: {player["name"]}")
         if player["team"] == 1 and index < len(sorted_player_list) and sorted_player_list[index]["team"] != 1:
-            msg.append(f"\n---------- 队伍2 ----------")
+            msg.append(f"\n---------- 队伍2({team_counts['Team 2']}) ----------")
     await MARNE_BIND.finish(msg)
 
 
