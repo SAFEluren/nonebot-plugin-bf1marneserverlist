@@ -45,9 +45,10 @@ async def is_enable() -> bool:
     return plugin_config.marne_plugin_enabled
 
 
-MARNE_MAIN = on_command('marne')
-MARNE_MODS = on_command('marne mods')
-MARNE_PLST = on_command('marne player')
+MARNE_MAIN = on_command('marne', aliases={"查服"})
+MARNE_MODS = on_command('marne mods', aliases={"查服 模组"})
+MARNE_PLST = on_command('marne player', aliases={"查服 玩家"})
+MARNE_MAPS = on_command('marne map', aliases={"查服 地图"})
 MARNE_BIND = on_command('marne bind', permission=GROUP_OWNER | GROUP_ADMIN | SUPERUSER)
 
 
@@ -60,7 +61,7 @@ async def request_marneapi(marne_serverid):
                 return content
             else:
                 print("Response content is None")
-                await MARNE_MAIN.finish('无法获取到服务器数据，请检查输入马恩服务器ID是否正确，或服务器当前未开启。')
+                await MARNE_MAIN.finish('无法获取到服务器数据，请检查输入的马恩服务器ID是否正确，或服务器当前未开启。')
                 return None
 
     except (httpx.HTTPStatusError, httpx.ConnectTimeout) as e:
@@ -69,7 +70,7 @@ async def request_marneapi(marne_serverid):
 
 @MARNE_MAIN.handle()
 # async def marne_info(event: GroupMessageEvent):
-async def _marneinfo(event: GroupMessageEvent):
+async def _info(event: GroupMessageEvent):
     session = event.group_id
     try:
         with open(data_dir / f'{session}.json', 'r', encoding='utf-8') as f:
@@ -94,7 +95,7 @@ async def _marneinfo(event: GroupMessageEvent):
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
     msg = Message([MessageSegment.text(f"查询成功")])
-    msg.append(f"\n绑定的服务器ID: {server_ID}")
+    msg.append(f"\n服务器ID: {server_ID}")
     msg.append(f"\n服务器名字: {server_name}")
     msg.append(f"\n服务器简介: {server_description}")
     msg.append(f"\n服务器区域: {server_region} - {server_country}")
@@ -107,7 +108,7 @@ async def _marneinfo(event: GroupMessageEvent):
 
 @MARNE_MODS.handle()
 # async def marne_info(event: GroupMessageEvent):
-async def _marnemods(event: GroupMessageEvent):
+async def _mods(event: GroupMessageEvent):
     session = event.group_id
 
     try:
@@ -135,44 +136,34 @@ async def _marnemods(event: GroupMessageEvent):
         "category": "分类",
         "link": "链接"
     }
-    key_order = ["name", "version", "category", "link"]
-    skip_keys = ["file_name"]
-
     # 访问"ModList"键节点下所有键值对并转换为消息
     mod_list = result["modList"]
     msg = Message([MessageSegment.text(f"查询成功")])
-    msg.append(f"\n绑定的服务器ID: {server_ID}")
+    msg.append(f"\n服务器ID: {server_ID}")
     msg.append(f"\n服务器名字: {server_name}")
     msg.append(f"\n服务器简介: {server_description}")
     msg.append(f"\n服务器区域: {server_region} - {server_country}")
     msg.append(f"\n---------- MOD信息 ----------")
 
     if len(mod_list) > 0:
-        for index, mod in enumerate(mod_list):
-            mod_message = Message()
-            for key in key_order:
-                # 如果键在要跳过的键的列表中，或者键不在模组信息中，则跳过
-                if key in skip_keys or key not in mod:
-                    continue
-                value = mod[key]
-                # 如果键为"link"且值为空，则跳过
-                if key == "link" and not value:
-                    continue
-                # 使用映射关系转换键
-                human_readable_key = key_mapping.get(key, key)
-                mod_message.append(f"\n{human_readable_key}: {value}")
-            msg += mod_message
-            if index < len(mod_list) - 1:
-                msg.append(f"\n---------- 以上是第{index + 1}个MOD ----------")
+        for index, mod in enumerate(result["modList"], start=1):
+            mod_info = []
+            for key in ["name", "version", "category", "link"]:
+                value = mod.get(key)
+                if value:
+                    mod_info.append(f"\n{key_mapping.get(key, key)}: {value}")
+            msg.append(''.join(mod_info))
+            if index < len(result["modList"]):
+                msg.append(f"\n---------- 以上是第{index}个MOD ----------")
     else:
-        msg.append("\n无 MOD 信息")
+        msg = Message([MessageSegment.text("服务器无 MOD")])
 
     await MARNE_BIND.finish(msg)
 
 
 @MARNE_PLST.handle()
 # async def marne_info(event: GroupMessageEvent):
-async def _marneplayers(event: GroupMessageEvent):
+async def _players(event: GroupMessageEvent):
     session = event.group_id
 
     try:
@@ -204,28 +195,27 @@ async def _marneplayers(event: GroupMessageEvent):
             team_counts["Team 2"] += 1
 
     msg = Message([MessageSegment.text(f"查询成功")])
-    msg.append(f"\n绑定的服务器ID: {server_ID}")
+    msg.append(f"\n服务器ID: {server_ID}")
     msg.append(f"\n服务器名字: {server_name}")
     msg.append(f"\n服务器简介: {server_description}")
     msg.append(f"\n服务器区域: {server_region} - {server_country}")
     msg.append(f"\n当前人数: {server_currentPlayers}")
     msg.append(f"\n---------- 队伍1({team_counts['Team 1']}) ----------")
     for index, player in enumerate(sorted_player_list, start=1):
-        msg.append(f"\n{index}.ID: {player["name"]}")
+        msg.append(f"\n{index}.{player["name"]}")
         if player["team"] == 1 and index < len(sorted_player_list) and sorted_player_list[index]["team"] != 1:
             msg.append(f"\n---------- 队伍2({team_counts['Team 2']}) ----------")
     await MARNE_BIND.finish(msg)
 
 
 @MARNE_BIND.handle()
-async def _bind(event: GroupMessageEvent, args: Annotated[Message, CommandArg()]):
+async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
     session = event.group_id
-    if len(args) == 0:
-        await MARNE_BIND.finish('未输入服务器ID')
-    try:
-        cmdargs = list(args[0].data.values())
-        serverID = int(cmdargs[0])
-    except (TypeError, ValueError):
+    serverID = args.extract_plain_text()
+
+    if len(args) == 1 & serverID.isdigit():
+        pass
+    else:
         await MARNE_BIND.finish('格式错误，仅允许纯数字')
         return
 
@@ -240,7 +230,7 @@ async def _bind(event: GroupMessageEvent, args: Annotated[Message, CommandArg()]
         return
 
     msg = Message([MessageSegment.text(f"绑定成功！")])
-    msg.append(f"\n绑定服务器ID: {serverID}")
+    msg.append(f"\n服务器ID: {serverID}")
     msg.append(f"\n服务器名字: {serverName}")
 
     await MARNE_BIND.send(msg)
