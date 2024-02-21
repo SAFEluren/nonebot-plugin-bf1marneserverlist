@@ -1,20 +1,18 @@
 import json
-from typing import Annotated
-
 import httpx
-import nonebot_plugin_localstore as store
+from nonebot import require
 from nonebot import get_plugin_config
 from nonebot import on_command
-from nonebot import require
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, GroupMessageEvent
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
 from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 
-from .config import Config
-
 require("nonebot_plugin_localstore")
+import nonebot_plugin_localstore as store
+
+from .config import Config
 
 __plugin_meta__ = PluginMetadata(
     name="nonebot-plugin-bf1marneserverlist",
