@@ -179,6 +179,7 @@ async def _players(event: GroupMessageEvent):
     server_region = result['region']
     server_country = result['country']
     server_currentPlayers = result['currentPlayers']
+    server_maxPlayers = result['maxPlayers']
 
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
@@ -197,14 +198,35 @@ async def _players(event: GroupMessageEvent):
     msg.append(f"\n服务器名字: {server_name}")
     msg.append(f"\n服务器简介: {server_description}")
     msg.append(f"\n服务器区域: {server_region} - {server_country}")
-    msg.append(f"\n当前人数: {server_currentPlayers}")
-    msg.append(f"\n---------- 队伍1({team_counts['Team 1']}) ----------")
-    for index, player in enumerate(sorted_player_list, start=1):
-        msg.append(f"\n{index}.{player["name"]}")
-        if player["team"] == 1 and index < len(sorted_player_list) and sorted_player_list[index]["team"] != 1:
-            msg.append(f"\n---------- 队伍2({team_counts['Team 2']}) ----------")
-    await MARNE_BIND.finish(msg)
+    msg.append(f"\n当前人数: {server_currentPlayers} / {server_maxPlayers}")
+    if server_currentPlayers == 0:
+        msg.append(f"\n--------------------"
+                   f"\n服务器内没有玩家"
+                   f"\n--------------------")
+        await MARNE_PLST.send(msg)
+        return
 
+    if team_counts['Team 1'] > 0:
+        msg.append(f"\n---------- 队伍1 ({team_counts['Team 1']}) ----------")
+        team1_count = 0
+        for player in sorted_player_list:
+            if player["team"] == 1:
+                team1_count += 1
+                msg.append(f"\n{team1_count}. {player['name']}")
+    else:
+        msg.append(f"\n---------- 队伍1无人 ----------")
+
+    if team_counts['Team 2'] > 0:
+        msg.append(f"\n---------- 队伍2 ({team_counts['Team 2']}) ----------")
+        team2_count = 0
+        for player in sorted_player_list:
+            if player["team"] == 2:
+                team2_count += 1
+                msg.append(f"\n{team2_count}. {player['name']}")
+    else:
+        msg.append(f"\n---------- 队伍2无人 ----------")
+
+    await MARNE_BIND.finish(msg)
 
 @MARNE_BIND.handle()
 async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
