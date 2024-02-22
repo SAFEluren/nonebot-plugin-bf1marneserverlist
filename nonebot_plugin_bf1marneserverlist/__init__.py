@@ -1,8 +1,9 @@
 import json
+
 import httpx
-from nonebot import require
 from nonebot import get_plugin_config
 from nonebot import on_command
+from nonebot import require
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, GroupMessageEvent
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
 from nonebot.params import CommandArg
@@ -185,13 +186,15 @@ async def _players(event: GroupMessageEvent):
         json.dump(result, f, ensure_ascii=False, indent=4)
     player_list = result['playerList']
     sorted_player_list = sorted(player_list, key=lambda x: x['team'])
-    team_counts = {'Team 1': 0, 'Team 2': 0}
+
+    team1_counts = 0
+    team2_counts = 0
     # 统计每个队伍的人数
     for player in player_list:
         if player['team'] == 1:
-            team_counts['Team 1'] += 1
+            team1_counts += 1
         elif player['team'] == 2:
-            team_counts['Team 2'] += 1
+            team2_counts += 1
 
     msg = Message([MessageSegment.text(f'查询成功')])
     msg.append(f'\n服务器ID: {server_ID}')
@@ -206,27 +209,30 @@ async def _players(event: GroupMessageEvent):
         await MARNE_PLST.send(msg)
         return
 
-    if team_counts['Team 1'] > 0:
-        msg.append(f'\n---------- 队伍1 ({team_counts['Team 1']}) ----------')
+    if team1_counts > 0:
+        msg.append(f'\n---------- 队伍1 ({team1_counts}) ----------')
         team1_count = 0
         for player in sorted_player_list:
             if player['team'] == 1:
+                player_name = player['name']
                 team1_count += 1
-                msg.append(f'\n{team1_count}. {player['name']}')
+                msg.append(f'\n{team1_count}. {player_name}')
     else:
         msg.append(f'\n---------- 队伍1无人 ----------')
 
-    if team_counts['Team 2'] > 0:
-        msg.append(f'\n---------- 队伍2 ({team_counts['Team 2']}) ----------')
+    if team2_counts > 0:
+        msg.append(f'\n---------- 队伍2 ({team2_counts}) ----------')
         team2_count = 0
         for player in sorted_player_list:
+            player_name = player['name']
             if player['team'] == 2:
                 team2_count += 1
-                msg.append(f'\n{team2_count}. {player['name']}')
+                msg.append(f'\n{team2_count}. {player_name}')
     else:
         msg.append(f'\n---------- 队伍2无人 ----------')
 
     await MARNE_BIND.finish(msg)
+
 
 @MARNE_BIND.handle()
 async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
