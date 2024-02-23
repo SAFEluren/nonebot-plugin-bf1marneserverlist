@@ -16,9 +16,15 @@ import nonebot_plugin_localstore as store
 from .config import Config
 
 __plugin_meta__ = PluginMetadata(
-    name='nonebot-plugin-bf1marneserverlist',
-    description='Onebot plugin for Battlefield 1 Marne',
-    usage='type /marne bind [serverID] and send /marne',
+    name='战地1-马恩私人服务器服务器查询',
+    description='Onebot 战地1 马恩私人服务器服务器查询插件',
+    usage='''
+    /marne : 获取当前群聊绑定的服务器的信息
+    /marne bind : 仅群主、管理员、机器人SUPERUSER 可用，绑定服务器到当前群聊
+    /marne mods : 获取当前群聊绑定的服务器的模组信息
+    /marne player : 获取当前群聊绑定的服务器的在线玩家列表
+    
+    ''',
 
     type='application',
     # 发布必填，当前有效类型有：`library`（为其他插件编写提供功能），`application`（向机器人用户提供功能）。
