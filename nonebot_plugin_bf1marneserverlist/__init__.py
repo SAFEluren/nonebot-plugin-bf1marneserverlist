@@ -1,6 +1,7 @@
 import json
 
 import httpx
+import loguru
 from nonebot import get_plugin_config
 from nonebot import on_command
 from nonebot import require
@@ -61,7 +62,7 @@ async def request_marneapi(marne_serverid):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(f'{marne_url}api/srvlst/{marne_serverid}')
-            content = response.text
+            content = response
             if content is not None and content != '[]':
                 return content
             else:
@@ -86,7 +87,7 @@ async def _info(event: GroupMessageEvent):
     serverID = group['id']
     results = await request_marneapi(serverID)
 
-    result = json.loads(results)
+    result = json.loads(results.text)
     server_ID = result['id']
     server_name = result['name']
     server_description = result['description']
@@ -95,6 +96,7 @@ async def _info(event: GroupMessageEvent):
     server_map = result['map']
     server_mode = result['mode']
     server_currentPlayers = result['currentPlayers']
+    server_currentSpectators = result['currentSpectators']
     server_maxPlayers = result['maxPlayers']
 
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
@@ -106,7 +108,7 @@ async def _info(event: GroupMessageEvent):
     msg.append(f'\n服务器区域: {server_region} - {server_country}')
     msg.append(f'\n当前地图: {server_map}')
     msg.append(f'\n游戏模式: {server_mode}')
-    msg.append(f'\n当前人数: {server_currentPlayers} / {server_maxPlayers}')
+    msg.append(f'\n当前人数: {server_currentPlayers} / {server_maxPlayers} [{server_currentSpectators}]')
 
     await MARNE_BIND.finish(msg)
 
@@ -179,13 +181,14 @@ async def _players(event: GroupMessageEvent):
         return
     serverID = group['id']
     results = await request_marneapi(serverID)
-    result = json.loads(results)
+    result = json.loads(results.text)
     server_ID = result['id']
     server_name = result['name']
     server_description = result['description']
     server_region = result['region']
     server_country = result['country']
     server_currentPlayers = result['currentPlayers']
+    server_currentSpectators = result['currentSpectators']
     server_maxPlayers = result['maxPlayers']
 
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
@@ -207,7 +210,7 @@ async def _players(event: GroupMessageEvent):
     msg.append(f'\n服务器名字: {server_name}')
     msg.append(f'\n服务器简介: {server_description}')
     msg.append(f'\n服务器区域: {server_region} - {server_country}')
-    msg.append(f'\n当前人数: {server_currentPlayers} / {server_maxPlayers}')
+    msg.append(f'\n当前人数: {server_currentPlayers} / {server_maxPlayers} [{server_currentSpectators}] ')
     if server_currentPlayers == 0:
         msg.append(f'\n--------------------'
                    f'\n服务器内没有玩家'
@@ -252,7 +255,10 @@ async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
         return
 
     result = await request_marneapi(serverID)
-    result = json.loads(result)
+    loguru.logger.debug(result)
+    if result.status_code != 200:
+        await MARNE_BIND.finish(f'API错误，返回的HTTP状态码为{result.status_code}',reply_message=True)
+    result = json.loads(result.text)
     serverName = result['name']
     try:
         with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
