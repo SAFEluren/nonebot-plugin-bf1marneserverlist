@@ -66,7 +66,7 @@ async def request_marneapi(marne_serverid):
                 return content
             else:
                 print('Response content is None')
-                await MARNE_MAIN.finish('无法获取到服务器数据，请检查输入的马恩服务器ID是否正确，或服务器当前未开启。')
+                await MARNE_MAIN.send('无法获取到服务器数据，请检查输入的马恩服务器ID是否正确，或服务器当前未开启。',reply_message=True)
                 return None
 
     except (httpx.HTTPStatusError, httpx.ConnectTimeout) as e:
@@ -120,7 +120,7 @@ async def _mods(event: GroupMessageEvent):
         with open(data_dir / f'{session}.json', 'r', encoding='utf-8') as f:
             group = json.load(f)
     except FileNotFoundError:
-        await MARNE_MAIN.send('请先绑定服务器ID.')
+        await MARNE_MODS.send('请先绑定服务器ID.',reply_message=True)
         return
     serverID = group['id']
     results = await request_marneapi(serverID)
@@ -163,7 +163,7 @@ async def _mods(event: GroupMessageEvent):
     else:
         msg = Message([MessageSegment.text('服务器无 MOD')])
 
-    await MARNE_BIND.finish(msg)
+    await MARNE_MODS.finish(msg,reply_message=True)
 
 
 @MARNE_PLST.handle()
@@ -212,7 +212,7 @@ async def _players(event: GroupMessageEvent):
         msg.append(f'\n--------------------'
                    f'\n服务器内没有玩家'
                    f'\n--------------------')
-        await MARNE_PLST.send(msg)
+        await MARNE_PLST.send(msg,reply_message=True)
         return
 
     if team1_counts > 0:
@@ -237,7 +237,7 @@ async def _players(event: GroupMessageEvent):
     else:
         msg.append(f'\n---------- 队伍2无人 ----------')
 
-    await MARNE_BIND.finish(msg)
+    await MARNE_PLST.finish(msg,reply_message=True)
 
 
 @MARNE_BIND.handle()
@@ -248,7 +248,7 @@ async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
     if len(args) == 1 & serverID.isdigit():
         pass
     else:
-        await MARNE_BIND.finish('格式错误，仅允许纯数字')
+        await MARNE_PLST.finish('格式错误，仅允许纯数字',reply_message=True)
         return
 
     result = await request_marneapi(serverID)
@@ -265,4 +265,4 @@ async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
     msg.append(f'\n服务器ID: {serverID}')
     msg.append(f'\n服务器名字: {serverName}')
 
-    await MARNE_BIND.send(msg)
+    await MARNE_BIND.send(msg,reply_message=True)
