@@ -62,16 +62,12 @@ async def request_marneapi(marne_serverid):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(f'{marne_url}api/srvlst/{marne_serverid}')
-            content = response
-            if content is not None and content != '[]':
-                return content
-            else:
-                print('Response content is None')
-                await MARNE_MAIN.send('无法获取到服务器数据，请检查输入的马恩服务器ID是否正确，或服务器当前未开启。',reply_message=True)
-                return None
+            loguru.logger.debug(response.text)
+            loguru.logger.debug(response.status_code)
+            return response
 
     except (httpx.HTTPStatusError, httpx.ConnectTimeout) as e:
-        print(f'HTTP error occurred: {e}')
+        loguru.logger.error(f'HTTP error occurred: {e}')
 
 
 @MARNE_MAIN.handle()
@@ -84,10 +80,13 @@ async def _info(event: GroupMessageEvent):
     except FileNotFoundError:
         await MARNE_MAIN.send('请先绑定服务器ID.')
         return
-    serverID = group['id']
-    results = await request_marneapi(serverID)
+    group_serverid = group['id']
+    results = await request_marneapi(group_serverid)
 
     result = json.loads(results.text)
+    if result is not None and result != '[]':
+        await MARNE_MAIN.send('服务器未开启',reply_message=True)
+        return
     server_ID = result['id']
     server_name = result['name']
     server_description = result['description']
@@ -122,11 +121,14 @@ async def _mods(event: GroupMessageEvent):
         with open(data_dir / f'{session}.json', 'r', encoding='utf-8') as f:
             group = json.load(f)
     except FileNotFoundError:
-        await MARNE_MODS.send('请先绑定服务器ID.',reply_message=True)
+        await MARNE_MODS.send('请先绑定服务器ID.', reply_message=True)
         return
-    serverID = group['id']
-    results = await request_marneapi(serverID)
-    result = json.loads(results)
+    group_serverid = group['id']
+    results = await request_marneapi(group_serverid)
+    result = json.loads(results.text)
+    if result is not None and result != '[]':
+        await MARNE_MODS.send('服务器未开启', reply_message=True)
+        return
     server_ID = result['id']
     server_name = result['name']
     server_description = result['description']
@@ -165,7 +167,7 @@ async def _mods(event: GroupMessageEvent):
     else:
         msg = Message([MessageSegment.text('服务器无 MOD')])
 
-    await MARNE_MODS.finish(msg,reply_message=True)
+    await MARNE_MODS.finish(msg, reply_message=True)
 
 
 @MARNE_PLST.handle()
@@ -179,9 +181,12 @@ async def _players(event: GroupMessageEvent):
     except FileNotFoundError:
         await MARNE_MAIN.send('请先绑定服务器ID.')
         return
-    serverID = group['id']
-    results = await request_marneapi(serverID)
+    group_serverid = group['id']
+    results = await request_marneapi(group_serverid)
     result = json.loads(results.text)
+    if result is not None and result != '[]':
+        await MARNE_PLST.send('服务器未开启', reply_message=True)
+        return
     server_ID = result['id']
     server_name = result['name']
     server_description = result['description']
@@ -215,7 +220,7 @@ async def _players(event: GroupMessageEvent):
         msg.append(f'\n--------------------'
                    f'\n服务器内没有玩家'
                    f'\n--------------------')
-        await MARNE_PLST.send(msg,reply_message=True)
+        await MARNE_PLST.send(msg, reply_message=True)
         return
 
     if team1_counts > 0:
@@ -240,7 +245,7 @@ async def _players(event: GroupMessageEvent):
     else:
         msg.append(f'\n---------- 队伍2无人 ----------')
 
-    await MARNE_PLST.finish(msg,reply_message=True)
+    await MARNE_PLST.finish(msg, reply_message=True)
 
 
 @MARNE_BIND.handle()
@@ -251,14 +256,19 @@ async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
     if len(args) == 1 & serverID.isdigit():
         pass
     else:
-        await MARNE_PLST.finish('格式错误，仅允许纯数字',reply_message=True)
+        await MARNE_PLST.finish('格式错误，仅允许纯数字', reply_message=True)
         return
 
     result = await request_marneapi(serverID)
     loguru.logger.debug(result)
-    if result.status_code != 200:
-        await MARNE_BIND.finish(f'API错误，返回的HTTP状态码为{result.status_code}',reply_message=True)
+    status_code = result.status_code
+    loguru.logger.info(result.status_code)
+    if status_code != 200:
+        await MARNE_BIND.finish(f'API错误，返回的HTTP状态码为{status_code}', reply_message=True)
     result = json.loads(result.text)
+    if result is not None and result != '[]':
+        await MARNE_BIND.send('服务器未开启或服务器ID错误', reply_message=True)
+        return
     serverName = result['name']
     try:
         with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
@@ -271,4 +281,4 @@ async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
     msg.append(f'\n服务器ID: {serverID}')
     msg.append(f'\n服务器名字: {serverName}')
 
-    await MARNE_BIND.send(msg,reply_message=True)
+    await MARNE_BIND.send(msg, reply_message=True)
