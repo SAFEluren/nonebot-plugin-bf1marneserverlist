@@ -84,7 +84,7 @@ async def _info(event: GroupMessageEvent):
     results = await request_marneapi(group_serverid)
 
     result = json.loads(results.text)
-    if result is not None and result = '[]':
+    if result is not None and result == '[]':
         await MARNE_MAIN.send('服务器未开启',reply_message=True)
         return
     server_ID = result['id']
@@ -126,7 +126,7 @@ async def _mods(event: GroupMessageEvent):
     group_serverid = group['id']
     results = await request_marneapi(group_serverid)
     result = json.loads(results.text)
-    if result is not None and result = '[]':
+    if result is not None and result == '[]':
         await MARNE_MODS.send('服务器未开启', reply_message=True)
         return
     server_ID = result['id']
@@ -184,7 +184,7 @@ async def _players(event: GroupMessageEvent):
     group_serverid = group['id']
     results = await request_marneapi(group_serverid)
     result = json.loads(results.text)
-    if result is not None and result = '[]':
+    if result is not None and result == '[]':
         await MARNE_PLST.send('服务器未开启', reply_message=True)
         return
     server_ID = result['id']
@@ -266,7 +266,7 @@ async def _bind(event: GroupMessageEvent, args: Message = CommandArg()):
     if status_code != 200:
         await MARNE_BIND.finish(f'API错误，返回的HTTP状态码为{status_code}', reply_message=True)
     result = json.loads(result.text)
-    if result is not None and result = '[]':
+    if result is not None and result == '[]':
         await MARNE_BIND.send('服务器未开启或服务器ID错误', reply_message=True)
         return
     serverName = result['name']
