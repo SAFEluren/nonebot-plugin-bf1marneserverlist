@@ -173,8 +173,8 @@ async def _mods(event: GroupMessageEvent):
     server_ID = result['id']
     server_name = result['name']
     server_description = result['description']
-    server_region = result['region']
-    server_country = result['country']
+    server_mapName = result['mapName']
+    server_gameMode = result['gameMode']
 
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
@@ -192,7 +192,7 @@ async def _mods(event: GroupMessageEvent):
     msg.append(f'\n服务器ID: {server_ID}')
     msg.append(f'\n服务器名字: {server_name}')
     msg.append(f'\n服务器简介: {server_description}')
-    msg.append(f'\n服务器区域: {server_region} - {server_country}')
+    msg.append(f'\n当前地图: {map_dict[server_mapName]} - {mode_dict[server_gameMode]}')
     msg.append(f'\n---------- MOD信息 ----------')
 
     if len(mod_list) > 0:
@@ -237,6 +237,8 @@ async def _players(event: GroupMessageEvent):
     server_currentPlayers = result['currentPlayers']
     server_currentSpectators = result['currentSpectators']
     server_maxPlayers = result['maxPlayers']
+    server_mapName = result['mapName']
+    server_gameMode = result['gameMode']
 
     with open(data_dir / f'{session}.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
@@ -256,7 +258,7 @@ async def _players(event: GroupMessageEvent):
     msg.append(f'\n服务器ID: {server_ID}')
     msg.append(f'\n服务器名字: {server_name}')
     msg.append(f'\n服务器简介: {server_description}')
-    msg.append(f'\n服务器区域: {server_region} - {server_country}')
+    msg.append(f'\n当前地图: {map_dict[server_mapName]} - {mode_dict[server_gameMode]}')
     msg.append(f'\n当前人数: {server_currentPlayers} / {server_maxPlayers} [{server_currentSpectators}] ')
     if server_currentPlayers == 0:
         msg.append(f'\n--------------------'
